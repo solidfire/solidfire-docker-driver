@@ -42,7 +42,7 @@ Containers that you migrate from one Docker host to another.
 
 
 ## Prerequisites
-Linux OS system with Open-ISCSI tools.  Currently, the cli calls and most
+Linux OS system with Open-iSCSI tools.  Currently, the cli calls and most
 of the API calls will work fine on Linux, or OSX, however all the attachment
 code depends on iSCSI.  This driver does NOT support FibreChannel.
 
@@ -56,7 +56,7 @@ Docker host node!
 
 ### Golang
 To install the latest Golang, just follow the easy steps on the Go install
-websiste.  Again, I prefer to download the tarball and install myself rather
+web site.  Again, I prefer to download the tarball and install myself rather
 than use a package manager like apt or yum:
 [Get Go](https://golang.org/doc/install)
 
@@ -74,8 +74,8 @@ here:
 
 ### Open iSCSI
 This driver uses iSCSI SolidFire storage devices, and makes iSCSI connections
-for your automatically.  In order to do that however you must have the Open
-ISCSI packages installed on each Docker node.
+for you automatically.  In order to do that however you must have the Open
+iSCSI packages installed on each Docker node.
 
 - Open-iSCSI
   * Ubuntu<br>
@@ -85,7 +85,7 @@ ISCSI packages installed on each Docker node.
 
   * Redhat variants<br>
   ```
-  sud yum in stall iscsi-initiator-utils
+  sudo yum install iscsi-initiator-utils
   ```
 
 ## Driver Installation
@@ -126,7 +126,7 @@ For example in your .bashrc set the following alias after setting up PATH:
   ```
 
 ## Configuration
-During startup of the SolidFire Docker service, the plugin obtains it's setting
+During startup of the SolidFire Docker service, the plugin obtains its setting
 information from a provided config file.  The config file can be specified via
 the command line on startup, and also by default the service will attempt to
 find a config at the default location:
@@ -165,11 +165,8 @@ iSCSI and utilizes CHAP security for iSCSI connections.  FC support may or may
 not be added in the future.
 
 ## Starting the daemon
-After install and setting up a configuration, all you need to is start the
-solidfire-docker-driver daemon so tha it can accept requests from Docker.
-
-Note that if
-
+After install and setting up a configuration, all you need to do is start the
+solidfire-docker-driver daemon so that it can accept requests from Docker.
   ```
   sudo solidfire-docker-driver daemon start -v
   ```
@@ -196,7 +193,7 @@ in the config file:
   -o size=10
   ```
 
-Now in order to use that volume with a Container you simply specify
+Now in order to use that volume with a Container you simply specify:
   ```
   docker run -v testvolume:/Data --volume-driver=solidfire -i -t ubuntu
   /bin/bash
@@ -211,7 +208,7 @@ cluster.
 
 Licensing
 ---------
-Copyright [2015] [SolidFire Inc]
+Copyright [2015, 2016] [SolidFire Inc]
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
