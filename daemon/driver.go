@@ -248,7 +248,7 @@ func (d SolidFireDriver) Path(r volume.Request) volume.Response {
 	return volume.Response{Mountpoint: path}
 }
 
-func (d SolidFireDriver) Mount(r volume.Request) volume.Response {
+func (d SolidFireDriver) Mount(r volume.MountRequest) volume.Response {
 	d.Mutex.Lock()
 	defer d.Mutex.Unlock()
 	log.Infof("Mounting volume %s on %s\n", r.Name, "solidfire")
@@ -284,7 +284,7 @@ func (d SolidFireDriver) Mount(r volume.Request) volume.Response {
 	return volume.Response{Mountpoint: d.MountPoint + "/" + r.Name}
 }
 
-func (d SolidFireDriver) Unmount(r volume.Request) volume.Response {
+func (d SolidFireDriver) Unmount(r volume.UnmountRequest) volume.Response {
 	log.Info("Unmounting volume: ", r.Name)
 	sfapi.Umount(filepath.Join(d.MountPoint, r.Name))
 	v, err := d.Client.GetVolumeByName(r.Name, d.TenantID)
