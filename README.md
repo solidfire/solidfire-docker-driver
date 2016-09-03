@@ -93,7 +93,7 @@ The binaries and source can be downloaded from [SolidFire Github](https://github
 
 ### Download the Linux binary from Github Releases
 ```
-wget https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.2/solidfire-docker-driver
+wget https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.3/solidfire-docker-driver
 
 # Move to a location in the bin path and adjust the ownership and permissions as necessary
 sudo mv solidfire-docker-driver /usr/local/bin
