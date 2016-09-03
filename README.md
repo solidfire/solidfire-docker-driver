@@ -116,16 +116,47 @@ The SolidFire plugin is made of multiple packages:
 In addition to providing the source, this should also build and install the
 solidfire-docker-driver binary in your Golang bin directory.
 
-You will need to make sure you've added the $GOPATH/bin to your path,
+You will need to make sure you've added ```$GOPATH/bin``` to your path,
 AND on Ubuntu you will also need to enable the use of the GO Bin path by sudo;
 either run visudo and edit, or provide an alias in your .bashrc file.
 
 For example in your .bashrc set the following alias after setting up PATH:
+  
   ```
   alias sudo='sudo env PATH=$PATH'
   ```
+  
+#### A note about compatability
+
+Docker and the Volume Plugins helper move pretty fast.  That's good, but it can
+be frustrating when you try and build from source and things no longer work
+because of a change made to the interfaces.
+
+One example is differences between 1.12.0 and 1.12.1, in 1.12.1 the interface
+for Mount and Unmount switched from a general Volume.Request object to using
+specific Volume.MountRequest and Volume.UnmountRequest objects.  This of course
+causes the generic build to fail.
+
+To get around this we'll work on keeping version branches up to date, but in
+addition we now offer releases on Github.  So you can pull the particular
+release that meets your needs instead of using go get and building.
+
+For those that do still want to build themeselves, have no fear... we've got
+you covered.  We've added the use of godeps so you can avoid some of the compat
+issues of the rapidly changing world but still build from source if that's what
+you're in to.
+
+##### Using godeps
+
+If you're not familiar with godpes it pretty simple.  You might want to read up
+on it a bit [here](https://godoc.org/github.com/tools/godep).
+
+TLDR, install the godep tool, and just do things as you normally would *but* preface the go commands with "godep":
+    ```godep go build```
+This works with go get and other go commands as well.
 
 ## Configuration
+
 During startup of the SolidFire Docker service, the plugin obtains its setting
 information from a provided config file.  The config file can be specified via
 the command line on startup, and also by default the service will attempt to
