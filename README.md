@@ -69,8 +69,7 @@ environment as per the instructions.
 ### Docker
 As far as Docker install, again I prefer using wget and pulling the latest version
 from get.docker.com.  You can find instructions and steps on the Docker website
-here:
-[Get Docker](https://docs.docker.com/linux/step_one/)
+here: [Get Docker](https://docs.docker.com/engine/installation/).
 
 ### Open iSCSI
 This driver uses iSCSI SolidFire storage devices, and makes iSCSI connections
@@ -89,13 +88,17 @@ iSCSI packages installed on each Docker node.
   ```
 
 ## Driver Installation
-### Download the linux binary from Github Release
-```
-wget https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.1/solidfire-docker-driver
 
-# move to a location in the bin path
+The binaries and source can be downloaded from [SolidFire Github](https://github.com/solidfire) site.
+
+### Download the Linux binary from Github Releases
+```
+wget https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.2/solidfire-docker-driver
+
+# Move to a location in the bin path and adjust the ownership and permissions as necessary
 sudo mv solidfire-docker-driver /usr/local/bin
 sudo chown root:root /usr/local/bin/solidfire-docker-driver
+sudo chmod 755 /usr/local/bin/solidfire-docker-driver
 ```
 ### Build from source yourself
   ```
@@ -104,9 +107,8 @@ sudo chown root:root /usr/local/bin/solidfire-docker-driver
 
 ** There are known issues with docker/go-plugins-helpers not building against the latest Docker version.  You can view the Issue on GitHub here:  https://github.com/docker/go-plugins-helpers/issues/46
 
-SolidFire Github page [SolidFire Github](https://github.com/solidfire)
+This will give you the source in your golang/src directory.
 
-This will give you the source in your golang/src
 The SolidFire plugin is made of multiple packages:
 - The SolidFire Docker Service Daemon
 - The SolidFire API (sfapi) modules providing our Go bindings
@@ -165,15 +167,18 @@ find a config at the default location:
   /var/lib/solidfire/solidfire.json
   ```
 
+If /var/lib/solidfire does not exist and you want to use the default location, 
+you need to manually create this directory before that.
+
 The SolidFire config file is a minimal config file that includes basic
-information abou the SolidFire cluster to use, and includes specification of a
+information about the SolidFire cluster to use, and includes specification of a
 tenant account to create and (or) use on the SolidFire cluster.  It also
 includes directives to specify where volumes should be mounted on the Docker
 host.  Here's an example solidfire.json config file:
 
   ```
   {
-    "Endpoint": "https://admin:admin@192.168.160.3/json-rpc/7.0",
+    "Endpoint": "https://admin:admin@192.168.160.3/json-rpc/8.0",
     "SVIP": "10.10.64.3:3260",
     "TenantName": "docker",
     "DefaultVolSz": 1,
@@ -186,10 +191,17 @@ host.  Here's an example solidfire.json config file:
   }
   ```
 
-Note the format of the endpoint is https://\<login\>:\<password\>@\<mvip\>/json-rpc/\<element-version\>
+Note the format of the endpoint URL format is: https://\<login\>:\<password\>@\<mvip\>/json-rpc/\<element-os-version\>
 
-Types are used to set desired QoS of Volumes via docker volume create opts.
+Types are used to set desired QoS of Volumes via docker volume create options.
 You're free to create as many types as you wish.
+
+Because the file contains SolidFire login credentials, you may want to change the ownership
+and permissions to something like this:
+  ```
+  sudo chown root:root /var/lib/solidfire/solidfire.json
+  sudo chmod 740 /var/lib/solidfire/solidfire.json
+  ```
 
 Please note that at this time the Docker plugin for SolidFire ONLY supports
 iSCSI and utilizes CHAP security for iSCSI connections.  FC support may or may
@@ -201,6 +213,9 @@ solidfire-docker-driver daemon so that it can accept requests from Docker.
   ```
   sudo solidfire-docker-driver daemon start -v
   ```
+
+Note that the verbose mode log file would contain SolidFire account
+credentials.
 
 ## Usage Examples
 Now that the daemon is running, you're ready to issue calls via the Docker
