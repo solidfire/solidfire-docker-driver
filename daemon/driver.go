@@ -319,7 +319,7 @@ func (d SolidFireDriver) List(r volume.Request) volume.Response {
 	}
 
 	for _, v := range vlist {
-		if v.Status == "Active" && v.AccountID == d.TenantID {
+		if v.Status == "active" && v.AccountID == d.TenantID {
 			vols = append(vols, &volume.Volume{Name: v.Name, Mountpoint: path})
 		}
 	}
