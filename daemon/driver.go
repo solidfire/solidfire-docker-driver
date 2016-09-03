@@ -185,7 +185,7 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 	if r.Options["size"] != "" {
 		s, _ := strconv.ParseInt(r.Options["size"], 10, 64)
 		log.Info("Received size request in Create: ", s)
-		vsz = int64(units.GiB) * s
+		vsz = int64(units.GB) * s
 	} else {
 		// NOTE(jdg): We need to cleanup the conversions and such when we read
 		// in from the config file, it's sort of ugly.  BUT, just remember that
