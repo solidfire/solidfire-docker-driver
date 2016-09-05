@@ -60,7 +60,7 @@ var (
 	}
 )
 
-func cmdSnapshotCreate(c *cli.Context) {
+func cmdSnapshotCreate(c *cli.Context) (err error) {
 	vID, _ := strconv.ParseInt(c.Args().First(), 10, 64)
 	var req sfapi.CreateSnapshotRequest
 	var result sfapi.CreateSnapshotResult
@@ -72,7 +72,7 @@ func cmdSnapshotCreate(c *cli.Context) {
 	response, err := client.Request("CreateSnapshot", req, sfapi.NewReqID())
 	if err != nil {
 		log.Errorf("Create snapshot failed: ", err)
-		return
+		return err
 	}
 	if err := json.Unmarshal([]byte(response), &result); err != nil {
 		log.Fatal(err)
@@ -87,18 +87,20 @@ func cmdSnapshotCreate(c *cli.Context) {
 	fmt.Println("VolumeID:   ", s.VolumeID)
 	fmt.Println("Size (GiB):  ", s.TotalSize/int64(units.GiB))
 	fmt.Println("-------------------------------------------")
+	return err
 }
-func cmdSnapshotDelete(c *cli.Context) {
+func cmdSnapshotDelete(c *cli.Context) (err error) {
 	for _, arg := range c.Args() {
 		sID, _ := strconv.ParseInt(arg, 10, 64)
 		client.DeleteSnapshot(sID)
 	}
+	return err
 }
 
-func cmdSnapshotRollback(c *cli.Context) {
+func cmdSnapshotRollback(c *cli.Context) (err error) {
 	if len(c.Args()) < 2 {
 		fmt.Println("Missing argument to rollback, requires <volumeID> <snapshotID>")
-		return
+		return err
 	}
 	vID, _ := strconv.ParseInt(c.Args().First(), 10, 64)
 	sID, _ := strconv.ParseInt(c.Args()[1], 10, 64)
@@ -106,9 +108,10 @@ func cmdSnapshotRollback(c *cli.Context) {
 	req.VolumeID = vID
 	req.SnapshotID = sID
 	client.RollbackToSnapshot(&req)
+	return err
 }
 
-func cmdSnapshotList(c *cli.Context) {
+func cmdSnapshotList(c *cli.Context) (err error) {
 	volID, _ := strconv.ParseInt(c.String("volume"), 10, 64)
 	var req sfapi.ListSnapshotsRequest
 	req.VolumeID = volID
@@ -119,4 +122,5 @@ func cmdSnapshotList(c *cli.Context) {
 	} else {
 		printSnapList(snapshots)
 	}
+	return err
 }
