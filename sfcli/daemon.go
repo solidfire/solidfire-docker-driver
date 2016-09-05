@@ -31,11 +31,12 @@ var (
 	}
 )
 
-func cmdDaemonStart(c *cli.Context) {
+func cmdDaemonStart(c *cli.Context) (err error) {
 	verbose := c.Bool("verbose")
 	cfg := c.String("config")
 	if cfg == "" {
 		cfg = "/var/lib/solidfire/solidfire.json"
 	}
 	daemon.Start(cfg, verbose)
+	return err
 }

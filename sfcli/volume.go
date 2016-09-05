@@ -128,13 +128,13 @@ var (
 	}
 )
 
-func cmdVolumeAttach(c *cli.Context) {
+func cmdVolumeAttach(c *cli.Context) (err error) {
 	id := c.Args().First()
 	volID, _ := strconv.ParseInt(id, 10, 64)
 	v, err := client.GetVolumeByID(volID)
 	if err != nil {
 		err = errors.New("Failed to find volume for attach")
-		return
+		return err
 	}
 	netDev := c.String("iface")
 	if c.String("iface") == "" {
@@ -144,7 +144,7 @@ func cmdVolumeAttach(c *cli.Context) {
 	if err != nil {
 		fmt.Println("Error encountered while performing iSCSI attach on Volume: ", volID)
 		fmt.Println(err)
-		return
+		return err
 
 	}
 
@@ -155,10 +155,11 @@ func cmdVolumeAttach(c *cli.Context) {
 	fmt.Println("Path:       ", path)
 	fmt.Println("Device:     ", device)
 	fmt.Println("-------------------------------------------")
+	return err
 
 }
 
-func cmdVolumeDetach(c *cli.Context) {
+func cmdVolumeDetach(c *cli.Context) (err error) {
 	id := c.Args().First()
 	volID, _ := strconv.ParseInt(id, 10, 64)
 	v, err := client.GetVolumeByID(volID)
@@ -166,51 +167,56 @@ func cmdVolumeDetach(c *cli.Context) {
 	if err != nil {
 		fmt.Println("Error encountered while performing iSCSI detach of Volume: ", volID)
 		fmt.Println(err)
-		return
+		return err
 
 	}
+	return err
 }
 
-func cmdVolumeAddToVag(c *cli.Context) {
+func cmdVolumeAddToVag(c *cli.Context) (err error) {
 	vID, _ := strconv.ParseInt(c.Args().First(), 10, 64)
 	vagID, _ := strconv.ParseInt(c.Args()[1], 10, 64)
 
 	var volIDs []int64
 	volIDs = append(volIDs, vID)
-	err := client.AddVolumeToAccessGroup(vagID, volIDs)
+	err = client.AddVolumeToAccessGroup(vagID, volIDs)
 	if err != nil {
 		fmt.Printf("Failed to add volume to VAG ID: %d\n", vagID)
-		return
+		return err
 	}
 	fmt.Printf("Succesfully added volume to VAG ID: %d\n", vagID)
+	return err
 }
 
-func cmdVolumeRollback(c *cli.Context) {
+func cmdVolumeRollback(c *cli.Context) (err error) {
 	var req sfapi.RollbackToSnapshotRequest
 	vid, _ := strconv.ParseInt(c.Args().First(), 10, 64)
 	sid, _ := strconv.ParseInt(c.Args()[1], 10, 64)
 
 	req.VolumeID = vid
 	req.SnapshotID = sid
-	_, err := client.RollbackToSnapshot(&req)
+	_, err = client.RollbackToSnapshot(&req)
 	if err != nil {
 		fmt.Errorf("failed rollback to snapshot: %+v\n", err)
 	}
+	return err
 }
 
-func cmdVolumeClone(c *cli.Context) {
+func cmdVolumeClone(c *cli.Context) (err error) {
 	var req sfapi.CloneVolumeRequest
 	id, _ := strconv.ParseInt(c.Args().First(), 10, 64)
 	name := c.Args()[1]
 	if id == 0 || name == "" {
 		fmt.Printf("Error, missing arguments to clone cmd")
-		return
+		// TODO(jdg): Create error object
+		return err
 	}
 	req.VolumeID = id
 	req.Name = name
 	v, err := client.CloneVolume(&req)
 	if err != nil {
 		fmt.Println("Error cloning volume: ", err)
+		return err
 	}
 	fmt.Println("-------------------------------------------")
 	fmt.Println("Succesfully Cloned Volume:")
@@ -221,9 +227,10 @@ func cmdVolumeClone(c *cli.Context) {
 	fmt.Println("QoS :       ", "minIOPS:", v.Qos.MinIOPS, "maxIOPS:", v.Qos.MaxIOPS, "burstIOPS:", v.Qos.BurstIOPS)
 	fmt.Println("Account:    ", v.AccountID)
 	fmt.Println("-------------------------------------------")
+	return err
 }
 
-func cmdVolumeCreate(c *cli.Context) {
+func cmdVolumeCreate(c *cli.Context) (err error) {
 	var req sfapi.CreateVolumeRequest
 	var qos sfapi.QoS
 	req.Name = c.Args().First()
@@ -286,14 +293,14 @@ func cmdVolumeCreate(c *cli.Context) {
 		err := client.AddVolumeToAccessGroup(vagID, volIDs)
 		if err != nil {
 			fmt.Printf("Failed to add volume to VAG ID: %d\n", vagID)
-			return
+			return err
 		}
 		fmt.Printf("Succesfully added volume to VAG ID: %d\n", vagID)
 	}
-	return
+	return nil
 }
 
-func cmdVolumeDelete(c *cli.Context) {
+func cmdVolumeDelete(c *cli.Context) (err error) {
 	volumes := c.String("range")
 	if volumes != "" {
 		ids := strings.Split(volumes, "-")
@@ -311,6 +318,7 @@ func cmdVolumeDelete(c *cli.Context) {
 			client.DeleteVolume(vID)
 		}
 	}
+	return nil
 }
 
 func listForAccount(acctID int64) (vols []sfapi.Volume, err error) {
@@ -323,10 +331,9 @@ func listActiveVolumes(req sfapi.ListActiveVolumesRequest) (vols []sfapi.Volume,
 	return client.ListActiveVolumes(&req)
 }
 
-func cmdVolumeList(c *cli.Context) {
+func cmdVolumeList(c *cli.Context) (err error) {
 	var req sfapi.ListActiveVolumesRequest
 	var volumes []sfapi.Volume
-	var err error
 
 	if c.String("account") != "" {
 		acctID, _ := strconv.ParseInt(c.String("account"), 10, 64)
@@ -348,5 +355,6 @@ func cmdVolumeList(c *cli.Context) {
 	} else {
 		printVolList(volumes)
 	}
+	return err
 
 }

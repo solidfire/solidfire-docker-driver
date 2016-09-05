@@ -138,7 +138,7 @@ func initClient(c *cli.Context) error {
 	return nil
 }
 
-func updateLogLevel(c *cli.Context) {
+func updateLogLevel(c *cli.Context) (err error) {
 	switch c.String("loglevel") {
 	case "panic":
 		log.SetLevel(log.PanicLevel)
@@ -153,4 +153,5 @@ func updateLogLevel(c *cli.Context) {
 	case "debug":
 		log.SetLevel(log.DebugLevel)
 	}
+	return err
 }

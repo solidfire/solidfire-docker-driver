@@ -42,16 +42,17 @@ var (
 	}
 )
 
-func cmdVagList(c *cli.Context) {
+func cmdVagList(c *cli.Context) (err error) {
 	var req sfapi.ListVolumeAccessGroupsRequest
 	groups, err := client.ListVolumeAccessGroups(&req)
 	if err != nil {
-
+		return err
 	}
 	fmt.Println(groups)
+	return err
 }
 
-func cmdVagCreate(c *cli.Context) {
+func cmdVagCreate(c *cli.Context) (err error) {
 	var req sfapi.CreateVolumeAccessGroupRequest
 	req.Name = c.Args().First()
 	for _, init := range c.StringSlice("initiator") {
@@ -65,5 +66,5 @@ func cmdVagCreate(c *cli.Context) {
 
 	vagID, _ := client.CreateVolumeAccessGroup(&req)
 	fmt.Println("VAG ID is: %s", vagID)
-
+	return nil
 }
