@@ -226,6 +226,12 @@ For a list of avaialable commands run:
   docker volume --help
   ```
 
+SolidFire driver-specific options can be obtained like so 
+(assuming the default location of the binary):
+  ```
+  /usr/local/bin/solidfire-docker-driver volume --help
+  ```
+
 Here's an example of how to create a SolidFire volume using the Docker Volume
 API:
   ```
