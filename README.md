@@ -226,12 +226,6 @@ For a list of avaialable commands run:
   docker volume --help
   ```
 
-SolidFire driver-specific options can be obtained like so 
-(assuming the default location of the binary):
-  ```
-  /usr/local/bin/solidfire-docker-driver volume --help
-  ```
-
 Here's an example of how to create a SolidFire volume using the Docker Volume
 API:
   ```
@@ -257,6 +251,27 @@ create method checks the SolidFire Cluster to see if the Volume already exists,
 if it does it just passes back the info for the existing volume, otherwise it
 runs through the create process and creates the Volume on the SolidFire
 cluster.
+
+SolidFire driver-specific help can be obtained like so (assuming the default 
+location of the binary):
+  ```
+  /usr/local/bin/solidfire-docker-driver volume --help
+  ```
+
+Using this binary you can perform various operations such as create snapshots 
+or clones that can be attached to new containers.
+  ```
+  solidfire-docker-driver -c /var/lib/solidfire/solidfire.json volume clone 73 testclone
+  -------------------------------------------
+  Succesfully Cloned Volume:
+  -------------------------------------------
+  ID:          75
+  Name:        testclone
+  Size (GiB):  10
+  QoS :        minIOPS: 6000 maxIOPS: 8000 burstIOPS: 10000
+  Account:     14
+  -------------------------------------------
+  ```
 
 Licensing
 ---------
