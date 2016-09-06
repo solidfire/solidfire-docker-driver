@@ -149,7 +149,7 @@ func cmdVolumeAttach(c *cli.Context) (err error) {
 	}
 
 	fmt.Println("-------------------------------------------")
-	fmt.Println("Succesfully iSCSI Attached Volume:")
+	fmt.Println("Successfully iSCSI Attached Volume:")
 	fmt.Println("-------------------------------------------")
 	fmt.Println("ID:         ", volID)
 	fmt.Println("Path:       ", path)
@@ -184,7 +184,7 @@ func cmdVolumeAddToVag(c *cli.Context) (err error) {
 		fmt.Printf("Failed to add volume to VAG ID: %d\n", vagID)
 		return err
 	}
-	fmt.Printf("Succesfully added volume to VAG ID: %d\n", vagID)
+	fmt.Printf("Successfully added volume to VAG ID: %d\n", vagID)
 	return err
 }
 
@@ -219,7 +219,7 @@ func cmdVolumeClone(c *cli.Context) (err error) {
 		return err
 	}
 	fmt.Println("-------------------------------------------")
-	fmt.Println("Succesfully Cloned Volume:")
+	fmt.Println("Successfully Cloned Volume:")
 	fmt.Println("-------------------------------------------")
 	fmt.Println("ID:         ", v.VolumeID)
 	fmt.Println("Name:       ", v.Name)
@@ -277,7 +277,7 @@ func cmdVolumeCreate(c *cli.Context) (err error) {
 		fmt.Println("Error creating volume: ", err)
 	}
 	fmt.Println("-------------------------------------------")
-	fmt.Println("Succesfully Created Volume:")
+	fmt.Println("Successfully Created Volume:")
 	fmt.Println("-------------------------------------------")
 	fmt.Println("ID:         ", v.VolumeID)
 	fmt.Println("Name:       ", v.Name)
@@ -295,7 +295,7 @@ func cmdVolumeCreate(c *cli.Context) (err error) {
 			fmt.Printf("Failed to add volume to VAG ID: %d\n", vagID)
 			return err
 		}
-		fmt.Printf("Succesfully added volume to VAG ID: %d\n", vagID)
+		fmt.Printf("Successfully added volume to VAG ID: %d\n", vagID)
 	}
 	return nil
 }
