@@ -11,7 +11,7 @@ BIN_DIR="/usr/bin"
 
 do_install() {
 mkdir -p /var/lib/solidfire/mount
-rm $BIN_DIR/$BIN_NAME
+rm $BIN_DIR/$BIN_NAME || true
 curl -sSL -o $BIN_DIR/$BIN_NAME $DRIVER_URL
 chmod +x $BIN_DIR/$BIN_NAME
 echo "
