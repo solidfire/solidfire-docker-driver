@@ -3,7 +3,7 @@ set -e
 #
 # This script provides a mechanism for easy installation of the
 # solidfire-docker-driver, use with curl:
-#  'curl -sSl https://https://raw.githubusercontent.com/solidfire/solidfire-docker-driver/master/install.sh | sh''
+#  'curl -sSl https://raw.githubusercontent.com/solidfire/solidfire-docker-driver/master/install.sh | sudo sh'
 
 BIN_NAME=solidfire-docker-driver
 DRIVER_URL="https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.3.1/solidfire-docker-driver"
