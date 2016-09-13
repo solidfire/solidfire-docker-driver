@@ -89,18 +89,22 @@ iSCSI packages installed on each Docker node.
 
 ## Driver Installation
 
-The binaries and source can be downloaded from [SolidFire Github](https://github.com/solidfire) site.
+The install script, binaries, and source can be downloaded from the [SolidFire Github](https://github.com/solidfire) site.
 
-### Download the Linux binary from Github Releases
-```
-wget https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.3/solidfire-docker-driver
+The easiest way to install is to use the install script (starting from release [v1.3.1](https://github.com/solidfire/solidfire-docker-driver/releases/tag/v1.3.1)), but you can also
+manually deploy the Linux binary or build from the source code.
 
-# Move to a location in the bin path and adjust the ownership and permissions as necessary
-sudo mv solidfire-docker-driver /usr/local/bin
-sudo chown root:root /usr/local/bin/solidfire-docker-driver
-sudo chmod 755 /usr/local/bin/solidfire-docker-driver
+### Download the Linux binary from Github
+
+You can [download](https://github.com/solidfire/solidfire-docker-driver/releases/) the binary and install it manually to a desired location. Move it to a location in the bin path (or elsewhere if you like) and adjust the ownership and permissions as necessary.
 ```
-### Build from source yourself
+wget https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.3.1/solidfire-docker-driver
+sudo mv solidfire-docker-driver /usr/bin
+sudo chown root:root /usr/bin/solidfire-docker-driver
+sudo chmod 755 /usr/bin/solidfire-docker-driver
+```
+### Build from Source Code
+
   ```
   go get -u github.com/solidfire/solidfire-docker-driver
   ```
@@ -153,9 +157,9 @@ you're in to.
 If you're not familiar with godpes it pretty simple.  You might want to read up
 on it a bit [here](https://godoc.org/github.com/tools/godep).
 
-TLDR, install the godep tool, and just do things as you normally would *but* preface the go commands with "godep":
-    ```godep go build```
-This works with go get and other go commands as well.
+In short, install the godep tool, and just do things as you normally would *but* preface the go commands with "godep":
+    ```godep go build```.
+This works with `go get` and other go commands as well.
 
 ## Configuration
 
@@ -208,14 +212,20 @@ iSCSI and utilizes CHAP security for iSCSI connections.  FC support may or may
 not be added in the future.
 
 ## Starting the daemon
+
 After install and setting up a configuration, all you need to do is start the
 solidfire-docker-driver daemon so that it can accept requests from Docker.
   ```
   sudo solidfire-docker-driver daemon start -v
   ```
 
-Note that the verbose mode log file would contain SolidFire account
-credentials.
+If you used the built-in installer script (v1.3.1 and later) you can instead 
+start the service:
+  ```
+  sudo service solidfire-docker-driver start
+  ```
+
+**NOTE**: The log may contain SolidFire account credentials.
 
 ## Usage Examples
 Now that the daemon is running, you're ready to issue calls via the Docker
@@ -252,10 +262,10 @@ if it does it just passes back the info for the existing volume, otherwise it
 runs through the create process and creates the Volume on the SolidFire
 cluster.
 
-SolidFire driver-specific help can be obtained like so (assuming the default 
-location of the binary):
+SolidFire driver-specific help can be obtained like so (assuming the location
+of the binary is in the user's $PATH):
   ```
-  /usr/local/bin/solidfire-docker-driver volume --help
+  solidfire-docker-driver volume --help
   ```
 
 Using this binary you can perform various operations such as create snapshots 
@@ -275,7 +285,7 @@ or clones that can be attached to new containers.
 
 Licensing
 ---------
-Copyright [2015, 2016] [SolidFire Inc]
+Copyright (c) – 2015-2016, NetApp, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
