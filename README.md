@@ -91,8 +91,7 @@ iSCSI packages installed on each Docker node.
 
 The install script, binaries, and source can be downloaded from the [SolidFire Github](https://github.com/solidfire) site.
 
-The easiest way to install is to use the install script (starting from release [v1.3.1](https://github.com/solidfire/solidfire-docker-driver/releases/tag/v1.3.1)), but you can also
-manually deploy the Linux binary or build from the source code.
+On systemd-compatible distributions such as Debian 7, Ubuntu 15.10, CentOS 7 and newer, the easiest way to install is to use the install script (starting from release [v1.3.1](https://github.com/solidfire/solidfire-docker-driver/releases/tag/v1.3.1)), but you can also manually deploy the Linux binary or build from the source code.
 
 ### Download the Linux binary from Github
 
@@ -271,7 +270,7 @@ of the binary is in the user's $PATH):
 Using this binary you can perform various operations such as create snapshots 
 or clones that can be attached to new containers.
   ```
-  solidfire-docker-driver -c /var/lib/solidfire/solidfire.json volume clone 73 testclone
+  solidfire-docker-driver -c /var/lib/solidfire/solidfire.json volume clone 75 testclone
   -------------------------------------------
   Succesfully Cloned Volume:
   -------------------------------------------
