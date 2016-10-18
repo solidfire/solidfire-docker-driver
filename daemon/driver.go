@@ -173,9 +173,10 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 	var vsz int64
 	var meta = map[string]string{"platform": "Docker-SFVP"}
 
+        theName := strings.Replace(r.Name, "_", "-",-1)
 	log.Debugf("GetVolumeByName: %s, %d", r.Name, d.TenantID)
 	log.Debugf("Options passed in to create: %+v", r.Options)
-	v, err := d.Client.GetVolumeByName(r.Name, d.TenantID)
+	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err == nil && v.VolumeID != 0 {
 		log.Infof("Found existing Volume by Name: %s", r.Name)
 		return volume.Response{}
@@ -216,7 +217,7 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 
 	req.TotalSize = vsz
 	req.AccountID = d.TenantID
-	req.Name = r.Name
+	req.Name = theName
 	req.Attributes = meta
 	_, err = d.Client.CreateVolume(&req)
 	if err != nil {
@@ -227,7 +228,8 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 
 func (d SolidFireDriver) Remove(r volume.Request) volume.Response {
 	log.Info("Remove/Delete Volume: ", r.Name)
-	v, err := d.Client.GetVolumeByName(r.Name, d.TenantID)
+        theName := strings.Replace(r.Name, "_", "-",-1)
+	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Error("Failed to retrieve volume named ", r.Name, "during Remove operation: ", err)
 		return volume.Response{Err: err.Error()}
@@ -252,7 +254,8 @@ func (d SolidFireDriver) Mount(r volume.Request) volume.Response {
 	d.Mutex.Lock()
 	defer d.Mutex.Unlock()
 	log.Infof("Mounting volume %s on %s\n", r.Name, "solidfire")
-	v, err := d.Client.GetVolumeByName(r.Name, d.TenantID)
+        theName := strings.Replace(r.Name, "_", "-",-1)
+	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Errorf("Failed to retrieve volume by name in mount operation: ", r.Name)
 		return volume.Response{Err: err.Error()}
@@ -286,8 +289,9 @@ func (d SolidFireDriver) Mount(r volume.Request) volume.Response {
 
 func (d SolidFireDriver) Unmount(r volume.Request) volume.Response {
 	log.Info("Unmounting volume: ", r.Name)
+        theName := strings.Replace(r.Name, "_", "-",-1)
 	sfapi.Umount(filepath.Join(d.MountPoint, r.Name))
-	v, err := d.Client.GetVolumeByName(r.Name, d.TenantID)
+	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		return volume.Response{Err: err.Error()}
 	}
@@ -298,7 +302,8 @@ func (d SolidFireDriver) Unmount(r volume.Request) volume.Response {
 func (d SolidFireDriver) Get(r volume.Request) volume.Response {
 	log.Info("Get volume: ", r.Name)
 	path := filepath.Join(d.MountPoint, r.Name)
-	v, err := d.Client.GetVolumeByName(r.Name, d.TenantID)
+        theName := strings.Replace(r.Name, "_", "-",-1)
+	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Error("Failed to retrieve volume named ", r.Name, "during Get operation: ", err)
 		return volume.Response{Err: err.Error()}
