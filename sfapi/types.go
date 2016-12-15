@@ -94,10 +94,10 @@ type CreateVolumeResult struct {
 type CloneVolumeRequest struct {
 	VolumeID     int64       `json:"volumeID"`
 	Name         string      `json:"name"`
-	NewAccountID int64       `json:"newAccountID"`
-	NewSize      int64       `json:"newSize"`
-	Access       string      `json:"access"`
-	SnapshotID   int64       `json:"snapshotID"`
+	NewAccountID int64       `json:"newAccountID,omitempty"`
+	NewSize      int64       `json:"newSize,omitempty"`
+	Access       string      `json:"access,omitempty"`
+	SnapshotID   int64       `json:"snapshotID,omitempty"`
 	Attributes   interface{} `json:"attributes"`
 }
 
@@ -108,6 +108,14 @@ type CloneVolumeResult struct {
 		VolumeID    int64 `json:"volumeID"`
 		AsyncHandle int64 `json:"asyncHandle"`
 	} `json:"result"`
+}
+
+type ModifyVolumeRequest struct {
+	VolumeID   int64       `json:"volumeID"`
+	AccountID  int64       `json:"accountID,omitempty"`
+	TotalSize  int64       `json:"totalSize,omitempty"`
+	Qos        QoS         `json:"qos,omitempty"`
+	Attributes interface{} `json:"attributes,omitempty"`
 }
 
 type CreateSnapshotRequest struct {

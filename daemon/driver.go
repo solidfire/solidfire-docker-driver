@@ -1,13 +1,14 @@
 package daemon
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"github.com/alecthomas/units"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/alecthomas/units"
 
 	"github.com/docker/go-plugins-helpers/volume"
 	"github.com/solidfire/solidfire-docker-driver/sfapi"
@@ -50,8 +51,8 @@ func New(cfgFile string) SolidFireDriver {
 		req := sfapi.AddAccountRequest{
 			Username: client.DefaultTenantName,
 		}
-		actID, err := client.AddAccount(&req)
-		if err != nil {
+		actID, nerr := client.AddAccount(&req)
+		if nerr != nil {
 			log.Fatalf("Failed init, unable to create Tenant (%s): %+v", client.DefaultTenantName, err)
 		}
 		tenantID = actID
@@ -160,6 +161,10 @@ func formatOpts(r volume.Request) {
 			r.Options["type"] = v
 		} else if strings.EqualFold(k, "qos") {
 			r.Options["qos"] = v
+		} else if strings.EqualFold(k, "from") {
+			r.Options["from"] = strings.Replace(v, "_", "-", -1)
+		} else if strings.EqualFold(k, "fromSnapshot") {
+			r.Options["fromSnapshot"] = strings.Replace(v, "_", "-", -1)
 		}
 	}
 }
@@ -168,12 +173,7 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 	log.Infof("Create volume %s on %s\n", r.Name, "solidfire")
 	d.Mutex.Lock()
 	defer d.Mutex.Unlock()
-	var req sfapi.CreateVolumeRequest
-	var qos sfapi.QoS
-	var vsz int64
-	var meta = map[string]string{"platform": "Docker-SFVP"}
-
-        theName := strings.Replace(r.Name, "_", "-",-1)
+	theName := strings.Replace(r.Name, "_", "-", -1)
 	log.Debugf("GetVolumeByName: %s, %d", r.Name, d.TenantID)
 	log.Debugf("Options passed in to create: %+v", r.Options)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
@@ -183,6 +183,7 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 	}
 	formatOpts(r)
 	log.Debugf("Options after conversion: %+v", r.Options)
+	var vsz int64
 	if r.Options["size"] != "" {
 		s, _ := strconv.ParseInt(r.Options["size"], 10, 64)
 		log.Info("Received size request in Create: ", s)
@@ -195,26 +196,16 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 		vsz = d.DefaultVolSz
 		log.Info("Creating with default size of: ", vsz)
 	}
-
-	if r.Options["qos"] != "" {
-		iops := strings.Split(r.Options["qos"], ",")
-		qos.MinIOPS, _ = strconv.ParseInt(iops[0], 10, 64)
-		qos.MaxIOPS, _ = strconv.ParseInt(iops[1], 10, 64)
-		qos.BurstIOPS, _ = strconv.ParseInt(iops[2], 10, 64)
-		req.Qos = qos
-		log.Infof("Received qos r.Options in Create: %+v", req.Qos)
+	// If 'from' is specified, this becomes a clone request
+        _, from := r.Options["from"]
+        _, fromSnapshot := r.Options["fromSnapshot"]
+	if from || fromSnapshot {
+		rsp := d.CloneVolume(r, vsz)
+		return rsp
 	}
-
-	if r.Options["type"] != "" {
-		for _, t := range *d.Client.VolumeTypes {
-			if strings.EqualFold(t.Type, r.Options["type"]) {
-				req.Qos = t.QOS
-				log.Infof("Received Type r.Options in Create and set QoS: %+v", req.Qos)
-				break
-			}
-		}
-	}
-
+	var req sfapi.CreateVolumeRequest
+	var meta = map[string]string{"platform": "Docker-SFVP"}
+	req.Qos = d.Client.MergeQoS(r.Options["type"], r.Options["qos"])
 	req.TotalSize = vsz
 	req.AccountID = d.TenantID
 	req.Name = theName
@@ -228,7 +219,7 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 
 func (d SolidFireDriver) Remove(r volume.Request) volume.Response {
 	log.Info("Remove/Delete Volume: ", r.Name)
-        theName := strings.Replace(r.Name, "_", "-",-1)
+	theName := strings.Replace(r.Name, "_", "-", -1)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Error("Failed to retrieve volume named ", r.Name, "during Remove operation: ", err)
@@ -254,10 +245,10 @@ func (d SolidFireDriver) Mount(r volume.Request) volume.Response {
 	d.Mutex.Lock()
 	defer d.Mutex.Unlock()
 	log.Infof("Mounting volume %s on %s\n", r.Name, "solidfire")
-        theName := strings.Replace(r.Name, "_", "-",-1)
+	theName := strings.Replace(r.Name, "_", "-", -1)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
-		log.Errorf("Failed to retrieve volume by name in mount operation: ", r.Name)
+		log.Error("Failed to retrieve volume by name in mount operation: ", r.Name)
 		return volume.Response{Err: err.Error()}
 	}
 	path, device, err := d.Client.AttachVolume(&v, d.InitiatorIFace)
@@ -276,7 +267,7 @@ func (d SolidFireDriver) Mount(r volume.Request) volume.Response {
 		//TODO(jdg): Enable selection of *other* fs types
 		err := sfapi.FormatVolume(device, "ext4")
 		if err != nil {
-			log.Errorf("Failed to format device: ", device)
+			log.Error("Failed to format device: ", device)
 			return volume.Response{Err: err.Error()}
 		}
 	}
@@ -289,7 +280,7 @@ func (d SolidFireDriver) Mount(r volume.Request) volume.Response {
 
 func (d SolidFireDriver) Unmount(r volume.Request) volume.Response {
 	log.Info("Unmounting volume: ", r.Name)
-        theName := strings.Replace(r.Name, "_", "-",-1)
+	theName := strings.Replace(r.Name, "_", "-", -1)
 	sfapi.Umount(filepath.Join(d.MountPoint, r.Name))
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
@@ -302,7 +293,7 @@ func (d SolidFireDriver) Unmount(r volume.Request) volume.Response {
 func (d SolidFireDriver) Get(r volume.Request) volume.Response {
 	log.Info("Get volume: ", r.Name)
 	path := filepath.Join(d.MountPoint, r.Name)
-        theName := strings.Replace(r.Name, "_", "-",-1)
+	theName := strings.Replace(r.Name, "_", "-", -1)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Error("Failed to retrieve volume named ", r.Name, "during Get operation: ", err)
@@ -333,4 +324,58 @@ func (d SolidFireDriver) List(r volume.Request) volume.Response {
 
 func (d SolidFireDriver) Capabilities(r volume.Request) volume.Response {
 	return volume.Response{Capabilities: volume.Capability{Scope: "global"}}
+}
+
+func (d SolidFireDriver) CloneVolume(r volume.Request, vsz int64) volume.Response {
+	log.Infof("Clone volume %s on %s\n", r.Name, "solidfire")
+	var req sfapi.CloneVolumeRequest
+	var meta = map[string]string{"platform": "Docker-SFVP"}
+	theName := strings.Replace(r.Name, "_", "-", -1)
+	if r.Options["fromSnapshot"] != "" {
+		// if we have fromSnapshot we can get the volumeID
+		snap, err := d.Client.GetSnapshot(0, r.Options["fromSnapshot"])
+		if err != nil {
+			log.Error("Failed to retrieve Snapshot ID:", err)
+			return volume.Response{Err: err.Error()}
+		}
+		req.SnapshotID = snap.SnapshotID
+		req.VolumeID = snap.VolumeID
+		if snap.TotalSize > vsz {
+			req.NewSize = snap.TotalSize
+		} else {
+			req.NewSize = vsz
+		}
+	} else {
+		sv, err := d.Client.GetVolumeByName(r.Options["from"], d.TenantID)
+		if err != nil {
+			log.Error("Failed to retrieve Src volume:", err)
+			return volume.Response{Err: err.Error()}
+		}
+		req.VolumeID = sv.VolumeID
+		if sv.TotalSize > vsz {
+			req.NewSize = sv.TotalSize
+		} else {
+			req.NewSize = vsz
+		}
+	}
+	req.Name = theName
+	req.NewAccountID = d.TenantID
+	req.Attributes = meta
+	nv, err := d.Client.CloneVolume(&req)
+	if err != nil {
+		log.Error("Failed to clone volume:", err)
+		return volume.Response{Err: err.Error()}
+	}
+	var qos sfapi.QoS
+	if qos = d.Client.MergeQoS(r.Options["type"], r.Options["qos"]); qos != (sfapi.QoS{}) {
+		var modreq sfapi.ModifyVolumeRequest
+		modreq.VolumeID = nv.VolumeID
+		modreq.Qos = qos
+		err := d.Client.ModifyVolume(&modreq)
+		if err != nil {
+			log.Error("Failed to update QoS on cloned volume:", err)
+			return volume.Response{Err: err.Error()}
+		}
+	}
+	return volume.Response{}
 }
