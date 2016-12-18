@@ -1,0 +1,86 @@
+{
+	"ImportPath": "github.com/ebalduf/solidfire-docker-driver",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Microsoft/go-winio",
+			"Comment": "v0.3.7",
+			"Rev": "24a3e3d3fc7451805e09d11e11e95d9a0a4f205e"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.11.0-25-g881bee4",
+			"Rev": "881bee4e20a5d11a6a88a5667c6f292072ac1963"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/units",
+			"Rev": "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Comment": "v1.19.1",
+			"Rev": "0bdeddeeb0f650497d603c4ad7b20cfe685682f6"
+		},
+		{
+			"ImportPath": "github.com/coreos/go-systemd/activation",
+			"Comment": "v14-11-g7c95333",
+			"Rev": "7c9533367ef925dc1078d75e5b7141e10da2c4e8"
+		},
+		{
+			"ImportPath": "github.com/coreos/go-systemd/util",
+			"Comment": "v14-11-g7c95333",
+			"Rev": "7c9533367ef925dc1078d75e5b7141e10da2c4e8"
+		},
+		{
+			"ImportPath": "github.com/coreos/pkg/dlopen",
+			"Comment": "v3-2-g447b7ec",
+			"Rev": "447b7ec906e523386d9c53be15b55a8ae86ea944"
+		},
+		{
+			"ImportPath": "github.com/docker/go-connections/sockets",
+			"Comment": "v0.2.1-12-g4ccf312",
+			"Rev": "4ccf312bf1d35e5dbda654e57a9be4c3f3cd0366"
+		},
+		{
+			"ImportPath": "github.com/docker/go-plugins-helpers/sdk",
+			"Rev": "77bfeec724ac5ae33f6a820c7ee6c98301b5a121"
+		},
+		{
+			"ImportPath": "github.com/docker/go-plugins-helpers/volume",
+			"Rev": "77bfeec724ac5ae33f6a820c7ee6c98301b5a121"
+		},
+		{
+			"ImportPath": "github.com/opencontainers/runc/libcontainer/user",
+			"Comment": "v1.0.0-rc2-175-g27a67c9",
+			"Rev": "27a67c9aa024584b69f599a55290476badd317e9"
+		},
+		{
+			"ImportPath": "github.com/solidfire/solidfire-docker-driver/daemon",
+			"Comment": "v1.3.1-21-g050043f",
+			"Rev": "050043fa58102dbcae30906e03ed195b75eca965"
+		},
+		{
+			"ImportPath": "github.com/solidfire/solidfire-docker-driver/sfapi",
+			"Comment": "v1.3.1-21-g050043f",
+			"Rev": "050043fa58102dbcae30906e03ed195b75eca965"
+		},
+		{
+			"ImportPath": "github.com/solidfire/solidfire-docker-driver/sfcli",
+			"Comment": "v1.3.1-21-g050043f",
+			"Rev": "050043fa58102dbcae30906e03ed195b75eca965"
+		},
+		{
+			"ImportPath": "golang.org/x/net/proxy",
+			"Rev": "45e771701b814666a7eb299e6c7a57d0b1799e91"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "d75a52659825e75fff6158388dddc6a5b04f9ba5"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows",
+			"Rev": "d75a52659825e75fff6158388dddc6a5b04f9ba5"
+		}
+	]
+}
