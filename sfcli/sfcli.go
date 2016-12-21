@@ -86,31 +86,38 @@ func NewCli(version string) *cli.App {
 			Name:   "loglevel",
 			Value:  "info",
 			Usage:  "Specifies the logging level (debug|warning|error)",
-			EnvVar: "LogLevel",
+			EnvVar: "SF_LOGLEVEL",
 		},
 		cli.StringFlag{
 			Name:   "svip, s",
 			Value:  "",
 			Usage:  "Specifies the SVIP of the SolidFire cluster including iscsi Port (\"1.1.1.1:3260\") .",
-			EnvVar: "SVIP",
+			EnvVar: "SF_SVIP",
 		},
 		cli.StringFlag{
-			Name:   "defaultAccountID, a",
+			Name:   "defaultAccountName, a",
 			Value:  "",
-			Usage:  "Specifies a default SolidFire AccountID to use for operations.",
-			EnvVar: "ACCOUNTID",
+			Usage:  "Specifies a default SolidFire account name to use for operations.",
+			EnvVar: "SF_ACCOUNTNAME",
 		},
 		cli.StringFlag{
 			Name:  "endpoint, e",
 			Value: "",
 			Usage: "Specifies the endpoint of the SolidFire cluster to issue cmds to, " +
 				"\n\t(\"https://admin:admin@172.16.140.21/json-rpc/7.0\") .",
-			EnvVar: "ENDPOINT",
+			EnvVar: "SF_ENDPOINT",
 		},
 		cli.StringFlag{
 			Name:  "config, c",
 			Value: "",
 			Usage: "Specify SolidFire config file to use (overrides env variables if set).",
+			EnvVar: "SF_CONFIG_FILE",
+		},
+		cli.Int64Flag{
+			Name:  "defaultVolSize",
+			Value: 1,
+			Usage: "Specify default volume size (overrides env variables if set).",
+			EnvVar: "SF_DEFAULT_SIZE",
 		},
 	}
 	app.CommandNotFound = cmdNotFound
@@ -129,10 +136,11 @@ func initClient(c *cli.Context) error {
 	cfgFile := c.GlobalString("config")
 	if cfgFile != "" {
 		client, _ = sfapi.NewFromConfig(cfgFile)
-		conf, _ := sfapi.ProcessConfig(cfgFile)
-		client.Config = &conf
 	} else {
-		client, _ = sfapi.New()
+		client, _ = sfapi.NewFromOpts(c.GlobalString("endpoint"),
+					c.GlobalInt64("defaultVolSize"),
+					c.GlobalString("svip"),
+					c.GlobalString("defaultAccountName"))
 	}
 	updateLogLevel(c)
 	return nil
