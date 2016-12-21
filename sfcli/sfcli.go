@@ -3,7 +3,7 @@ package sfcli
 import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/solidfire/solidfire-docker-driver/sfapi"
 	"strings"
 	"unicode/utf8"

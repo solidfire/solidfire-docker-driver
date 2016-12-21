@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"github.com/alecthomas/units"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/solidfire/solidfire-docker-driver/sfapi"
 	"strconv"
 )

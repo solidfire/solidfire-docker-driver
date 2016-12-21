@@ -1,7 +1,7 @@
 package sfcli
 
 import (
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/solidfire/solidfire-docker-driver/daemon"
 )
 
