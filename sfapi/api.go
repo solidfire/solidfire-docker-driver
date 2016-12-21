@@ -148,6 +148,28 @@ func (c *Client) Request(method string, params interface{}, id int) (response []
 	return body, nil
 }
 
+func (c *Client) MergeQoS(theType string, rQos string) ( QoS ) {
+	var qos QoS
+	if rQos != "" {
+		iops := strings.Split(rQos, ",")
+		qos.MinIOPS, _ = strconv.ParseInt(iops[0], 10, 64)
+		qos.MaxIOPS, _ = strconv.ParseInt(iops[1], 10, 64)
+		qos.BurstIOPS, _ = strconv.ParseInt(iops[2], 10, 64)
+		log.Infof("Received qos Options and set QoS: %+v", qos)
+	}
+
+	if theType != "" {
+		for _, t := range *c.VolumeTypes {
+			if strings.EqualFold(t.Type, theType) {
+				qos = t.QOS
+				log.Infof("Received Type Options and set QoS: %+v", qos)
+				break
+			}
+		}
+	}
+	return qos
+}
+
 func newReqID() int {
 	return rand.Intn(1000-1) + 1
 }

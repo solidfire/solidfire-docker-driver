@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"strings"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 func (c *Client) ListVolumesForAccount(listReq *ListVolumesForAccountRequest) (volumes []Volume, err error) {
@@ -214,4 +215,13 @@ func (c *Client) AttachVolume(v *Volume, iface string) (path, device string, err
 		return path, device, nil
 	}
 	return path, device, nil
+}
+
+func (c *Client) ModifyVolume(modReq *ModifyVolumeRequest) (err error) {
+	_, err = c.Request("ModifyVolume", modReq, newReqID())
+	if err != nil {
+		return err
+	}
+	// only thing that comes back from this is the curve, which is not used
+	return nil
 }
