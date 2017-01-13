@@ -11,7 +11,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -51,24 +50,6 @@ var (
 	cfg               Config
 )
 
-func init() {
-	if os.Getenv("SF_CONFIG_FILE") != "" {
-		conf, _ := ProcessConfig(configFile)
-		cfg = conf
-		endpoint = conf.EndPoint
-		svip = conf.SVIP
-		configFile = os.Getenv("SF_CONFIG_FILE")
-		defaultSizeGiB = conf.DefaultVolSz
-		defaultTenantName = conf.TenantName
-	} else {
-		endpoint = os.Getenv("SF_ENDPOINT")
-		svip = os.Getenv("SF_SVIP")
-		configFile = os.Getenv("SF_CONFIG_FILE")
-		defaultSizeGiB, _ = strconv.ParseInt(os.Getenv("SF_DEFAULT_VSIZE"), 10, 64)
-		defaultTenantName = os.Getenv("SF_DEFAULT_TENANT_NAME")
-	}
-}
-
 func ProcessConfig(fname string) (Config, error) {
 	content, err := ioutil.ReadFile(fname)
 	if err != nil {
@@ -93,6 +74,16 @@ func NewFromConfig(configFile string) (c *Client, err error) {
 	configFile = os.Getenv("SF_CONFIG_FILE")
 	defaultSizeGiB = conf.DefaultVolSz
 	defaultTenantName = conf.TenantName
+	return New()
+}
+
+func NewFromOpts(ep string, dSize int64, storageIP string, acct string) (c *Client, err error) {
+	endpoint = ep
+	svip = storageIP
+	defaultTenantName = acct
+	defaultSizeGiB = dSize
+	configFile = ""
+	cfg = Config{}
 	return New()
 }
 
@@ -155,6 +146,28 @@ func (c *Client) Request(method string, params interface{}, id int) (response []
 		return body, err
 	}
 	return body, nil
+}
+
+func (c *Client) MergeQoS(theType string, rQos string) ( QoS ) {
+	var qos QoS
+	if rQos != "" {
+		iops := strings.Split(rQos, ",")
+		qos.MinIOPS, _ = strconv.ParseInt(iops[0], 10, 64)
+		qos.MaxIOPS, _ = strconv.ParseInt(iops[1], 10, 64)
+		qos.BurstIOPS, _ = strconv.ParseInt(iops[2], 10, 64)
+		log.Infof("Received qos Options and set QoS: %+v", qos)
+	}
+
+	if theType != "" {
+		for _, t := range *c.VolumeTypes {
+			if strings.EqualFold(t.Type, theType) {
+				qos = t.QOS
+				log.Infof("Received Type Options and set QoS: %+v", qos)
+				break
+			}
+		}
+	}
+	return qos
 }
 
 func newReqID() int {
