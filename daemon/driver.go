@@ -14,6 +14,8 @@ import (
 	"github.com/solidfire/solidfire-docker-driver/sfapi"
 )
 
+const Version = "1.3.2"
+
 type SolidFireDriver struct {
 	TenantID       int64
 	DefaultVolSz   int64
@@ -89,6 +91,10 @@ func New(cfgFile string) SolidFireDriver {
 	return d
 }
 
+func translateName(name string) string {
+	return strings.Replace(name, "_", "-", -1)
+}
+
 func NewSolidFireDriverFromConfig(c *sfapi.Config) SolidFireDriver {
 	var tenantID int64
 
@@ -162,9 +168,9 @@ func formatOpts(r volume.Request) {
 		} else if strings.EqualFold(k, "qos") {
 			r.Options["qos"] = v
 		} else if strings.EqualFold(k, "from") {
-			r.Options["from"] = strings.Replace(v, "_", "-", -1)
+			r.Options["from"] = translateName(v)
 		} else if strings.EqualFold(k, "fromSnapshot") {
-			r.Options["fromSnapshot"] = strings.Replace(v, "_", "-", -1)
+			r.Options["fromSnapshot"] = translateName(v)
 		}
 	}
 }
@@ -173,7 +179,7 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 	log.Infof("Create volume %s on %s\n", r.Name, "solidfire")
 	d.Mutex.Lock()
 	defer d.Mutex.Unlock()
-	theName := strings.Replace(r.Name, "_", "-", -1)
+	theName := translateName(r.Name)
 	log.Debugf("GetVolumeByName: %s, %d", r.Name, d.TenantID)
 	log.Debugf("Options passed in to create: %+v", r.Options)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
@@ -197,14 +203,16 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 		log.Info("Creating with default size of: ", vsz)
 	}
 	// If 'from' is specified, this becomes a clone request
-        _, from := r.Options["from"]
-        _, fromSnapshot := r.Options["fromSnapshot"]
+	_, from := r.Options["from"]
+	_, fromSnapshot := r.Options["fromSnapshot"]
 	if from || fromSnapshot {
 		rsp := d.CloneVolume(r, vsz)
 		return rsp
 	}
 	var req sfapi.CreateVolumeRequest
-	var meta = map[string]string{"platform": "Docker-SFVP"}
+	var meta = map[string]string{"platform": "Docker-SFVP",
+		"SFVP-Version": Version,
+		"DockerName":   r.Name}
 	req.Qos = d.Client.MergeQoS(r.Options["type"], r.Options["qos"])
 	req.TotalSize = vsz
 	req.AccountID = d.TenantID
@@ -219,7 +227,7 @@ func (d SolidFireDriver) Create(r volume.Request) volume.Response {
 
 func (d SolidFireDriver) Remove(r volume.Request) volume.Response {
 	log.Info("Remove/Delete Volume: ", r.Name)
-	theName := strings.Replace(r.Name, "_", "-", -1)
+	theName := translateName(r.Name)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Error("Failed to retrieve volume named ", r.Name, "during Remove operation: ", err)
@@ -245,7 +253,7 @@ func (d SolidFireDriver) Mount(r volume.MountRequest) volume.Response {
 	d.Mutex.Lock()
 	defer d.Mutex.Unlock()
 	log.Infof("Mounting volume %s on %s\n", r.Name, "solidfire")
-	theName := strings.Replace(r.Name, "_", "-", -1)
+	theName := translateName(r.Name)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Error("Failed to retrieve volume by name in mount operation: ", r.Name)
@@ -280,7 +288,7 @@ func (d SolidFireDriver) Mount(r volume.MountRequest) volume.Response {
 
 func (d SolidFireDriver) Unmount(r volume.UnmountRequest) volume.Response {
 	log.Info("Unmounting volume: ", r.Name)
-	theName := strings.Replace(r.Name, "_", "-", -1)
+	theName := translateName(r.Name)
 	sfapi.Umount(filepath.Join(d.MountPoint, r.Name))
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
@@ -293,7 +301,7 @@ func (d SolidFireDriver) Unmount(r volume.UnmountRequest) volume.Response {
 func (d SolidFireDriver) Get(r volume.Request) volume.Response {
 	log.Info("Get volume: ", r.Name)
 	path := filepath.Join(d.MountPoint, r.Name)
-	theName := strings.Replace(r.Name, "_", "-", -1)
+	theName := translateName(r.Name)
 	v, err := d.Client.GetVolumeByName(theName, d.TenantID)
 	if err != nil {
 		log.Error("Failed to retrieve volume named ", r.Name, "during Get operation: ", err)
@@ -329,8 +337,10 @@ func (d SolidFireDriver) Capabilities(r volume.Request) volume.Response {
 func (d SolidFireDriver) CloneVolume(r volume.Request, vsz int64) volume.Response {
 	log.Infof("Clone volume %s on %s\n", r.Name, "solidfire")
 	var req sfapi.CloneVolumeRequest
-	var meta = map[string]string{"platform": "Docker-SFVP"}
-	theName := strings.Replace(r.Name, "_", "-", -1)
+	var meta = map[string]string{"platform": "Docker-SFVP",
+		"SFVP-Version": Version,
+		"DockerName":   r.Name}
+	theName := translateName(r.Name)
 	if r.Options["fromSnapshot"] != "" {
 		// if we have fromSnapshot we can get the volumeID
 		snap, err := d.Client.GetSnapshot(0, r.Options["fromSnapshot"])
@@ -345,6 +355,7 @@ func (d SolidFireDriver) CloneVolume(r volume.Request, vsz int64) volume.Respons
 		} else {
 			req.NewSize = vsz
 		}
+		meta["From-Snapshot"] = strconv.FormatInt(req.SnapshotID, 10)
 	} else {
 		sv, err := d.Client.GetVolumeByName(r.Options["from"], d.TenantID)
 		if err != nil {
@@ -357,6 +368,7 @@ func (d SolidFireDriver) CloneVolume(r volume.Request, vsz int64) volume.Respons
 		} else {
 			req.NewSize = vsz
 		}
+		meta["From-Volume"] = strconv.FormatInt(req.VolumeID, 10)
 	}
 	req.Name = theName
 	req.NewAccountID = d.TenantID

@@ -18,5 +18,5 @@ func Start(cfgFile string, debug bool) {
 	}
 	d := New(cfgFile)
 	h := volume.NewHandler(d)
-	log.Info(h.ServeUnix("root", "solidfire"))
+	log.Info(h.ServeUnix("solidfire", 0))
 }
