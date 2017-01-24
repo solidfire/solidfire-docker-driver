@@ -6,7 +6,7 @@ set -e
 #  'curl -sSl https://raw.githubusercontent.com/solidfire/solidfire-docker-driver/master/install.sh | sudo sh'
 
 BIN_NAME=solidfire-docker-driver
-DRIVER_URL="https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.3.1/solidfire-docker-driver"
+DRIVER_URL="https://github.com/solidfire/solidfire-docker-driver/releases/download/v1.3.2/solidfire-docker-driver"
 BIN_DIR="/usr/bin"
 
 do_install() {
