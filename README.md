@@ -153,7 +153,7 @@ you're in to.
 
 ##### Using godeps
 
-If you're not familiar with godpes it pretty simple.  You might want to read up
+If you're not familiar with godeps it pretty simple.  You might want to read up
 on it a bit [here](https://godoc.org/github.com/tools/godep).
 
 In short, install the godep tool, and just do things as you normally would *but* preface the go commands with "godep":
@@ -236,7 +236,7 @@ For a list of avaialable commands run:
   ```
 
 Here's an example of how to create a SolidFire volume using the Docker Volume
-API:
+API (you may need to execute these as sudoer):
   ```
   docker volume create -d solidfire --name=testvolume
   ```
@@ -274,7 +274,7 @@ or clones that can be attached to new containers.
   -------------------------------------------
   Succesfully Cloned Volume:
   -------------------------------------------
-  ID:          75
+  ID:          134
   Name:        testclone
   Size (GiB):  10
   QoS :        minIOPS: 6000 maxIOPS: 8000 burstIOPS: 10000
@@ -284,7 +284,7 @@ or clones that can be attached to new containers.
 
 Licensing
 ---------
-Copyright (c) – 2015-2016, NetApp, Inc. All rights reserved.
+Copyright (c) – 2015-2017, NetApp, Inc. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
