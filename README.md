@@ -1,3 +1,12 @@
+THIS PROJECT HAS MOVED AND IS NO LONGER MAINTAINED HERE
+========================================================
+The solidfire-docker-driver is part of the netappndvp plugin.  Testing and development efforts are now
+focused on the new code base and plugin which you can find at:
+https://github.com/netapp/netappdvp
+
+Don't worry, it's the same functionality and much of the same code, we just moved it into the global project to 
+focus our development and test efforts.
+
 SolidFire Plugin for Docker Volumes
 ======================================
 Plugin for SolidFire Docker integration
